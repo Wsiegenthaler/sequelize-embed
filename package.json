@@ -1,0 +1,41 @@
+{
+  "name": "sequelize-embed",
+  "version": "0.1.0",
+  "description": "Update and Insert for sequelize models with nested associations",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "./node_modules/jasmine-node/bin/jasmine-node ./test",
+    "test-travis": "./node_modules/istanbul/lib/cli.js cover --root . --include-all-sources jasmine-node ./test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wsiegenthaler/sequelize-embed.git"
+  },
+  "keywords": [
+    "sequelize",
+    "associations",
+    "model",
+    "sync",
+    "deep",
+    "embed",
+    "json"
+  ],
+  "author": "Weston Siegenthaler",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/wsiegenthaler/sequelize-embed/issues"
+  },
+  "homepage": "https://github.com/wsiegenthaler/sequelize-embed#readme",
+  "devDependencies": {
+    "coveralls": "^2.11.15",
+    "istanbul": "^0.4.5",
+    "jasmine": "^2.5.3",
+    "jasmine-node": "^1.14.5",
+    "sequelize": "^3.30.0",
+    "sqlite3": "^3.1.8"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "lodash": "^4.17.4"
+  }
+}
