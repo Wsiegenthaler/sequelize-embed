@@ -18,7 +18,10 @@
     "sync",
     "deep",
     "embed",
-    "json"
+    "json",
+    "document",
+    "epilogue",
+    "rest"
   ],
   "author": "Weston Siegenthaler",
   "license": "BSD-3-Clause",
@@ -27,6 +30,7 @@
   },
   "homepage": "https://github.com/wsiegenthaler/sequelize-embed#readme",
   "devDependencies": {
+    "codeclimate-test-reporter": "^0.4.0",
     "coveralls": "^2.11.15",
     "istanbul": "^0.4.5",
     "jasmine": "^2.5.3",
