@@ -7,6 +7,10 @@ var { allReflect, diff, isModelInstance, pkId, isHasOne, isHasMany, isBelongsTo,
 
 function IndexExport(sequelize) {
 
+  /* Core api */
+  var insert = (model, values, include, options) => apiWrap(t => insertDeep(model, values, include, t), options)  
+  var update = (model, values, include, options) => apiWrap(t => updateDeep(model, values, include, t), options) 
+
   /* Default options for insert/update */
   var defaults = { pruneFks: true, reload: true };
 
@@ -32,35 +36,23 @@ function IndexExport(sequelize) {
     }
   };
 
-  var insert = (model, values, include, options) => {
+  var apiWrap = (action, options) => {
     options = lo.defaults(options, defaults);
     var externalTx = lo.isObject(options.transaction);
     return (externalTx ? Promise.resolve(options.transaction) : sequelize.transaction())
-      .then(t => insertDeep(model, values, include, t)
+      .then(t => action(t)
         .tap(commit(t, externalTx))
         .catch(rollback(t, externalTx))
         .then(inst => !options.reload ? Promise.resolve(inst) : reload(inst, options.readInclude, options.pruneFks)))
   };
 
-  var update = (model, values, include, options) => {
-    options = lo.defaults(options, defaults);
-    var externalTx = lo.isObject(options.transaction);
-    return (externalTx ? Promise.resolve(options.transaction) : sequelize.transaction())
-      .then(t => updateDeep(model, values, include, t)
-        .tap(commit(t, externalTx))
-        .catch(rollback(t, externalTx))
-        .then(inst => !options.reload ? Promise.resolve(inst) : reload(inst, options.readInclude, options.pruneFks)))
-  };
-
-  var insertDeep = (model, values, include, t) => 
+  var traverseDeep = (model, values, include, t, action) => 
     updateUpstream(model, values, include, t)
-      .then(() => insertSelf(model, values, t))
+      .then(action)
       .then(inst => updateDownstream(inst, values, include, t))
 
-  var updateDeep = (model, values, include, t) => 
-    updateUpstream(model, values, include, t)
-      .then(() => updateSelf(model, values, t))
-      .then(inst => updateDownstream(inst, values, include, t))
+  var insertDeep = (model, values, include, t) => traverseDeep(model, values, include, t, () => insertSelf(model, values, t))
+  var updateDeep = (model, values, include, t) => traverseDeep(model, values, include, t, () => updateSelf(model, values, t))
 
   var commit = (t, skip) => () => {
     if (!skip) return t.commit()
@@ -134,43 +126,28 @@ function IndexExport(sequelize) {
   var updateHasOnes = (instance, values, include, t) => 
     allReflect(include.map(inc => {
       var a = inc.association, as = a.associationAccessor, val = values[as];
-      if (!lo.isUndefined(val)) {
-        return a.get(instance).then(lastVal => {
-          var delta = diff(val, lastVal, pkId(a.target));
-          return allReflect(
-            lo.flatten([
-              delta.added.map(add => {
-                add[a.foreignKey] = instance[a.source.primaryKeyAttribute];
-                return updateOrInsert(inc.model, add, inc.include, t);
-              }),
-              delta.removed.map(removed => removed.destroy({ transaction: t })),
-              delta.existing.map(existing => updateDeep(inc.model, existing.current, inc.include, t)) ]
-            ));
-        });
-      }
+      if (!lo.isUndefined(val)) return updateHasValues(instance, val, a, inc.include, t);
     }));
 
   var updateHasManys = (instance, data, include, t) => 
     allReflect(include.map(inc => {
       var a = inc.association, as = a.associationAccessor, vals = data[as];
-      if (lo.isUndefined(vals)) {
-        // no value of given for update, skip
-      } else if (lo.isArray(vals) || vals === null) {
-        vals = vals || [];
-        return a.get(instance).then(lastVals => {
-          var delta = diff(vals, lastVals, pkId(a.target));
-          return allReflect(
-            lo.flatten([
-              delta.added.map(add => {
-                add[a.foreignKey] = instance[a.source.primaryKeyAttribute];
-                return updateOrInsert(inc.model, add, inc.include, t);
-              }),
-              delta.removed.map(removed => removed.destroy({ transaction: t })),
-              delta.existing.map(existing => updateDeep(inc.model, existing.current, inc.include, t)) ]
-            ));
-        });
-      }
+      if (lo.isArray(vals) || vals === null) return updateHasValues(instance, vals || [], a, inc.include, t);
     }));
+
+  var updateHasValues = (instance, vals, a, include, t) => 
+    a.get(instance).then(lastVals => {
+      var delta = diff(vals, lastVals, pkId(a.target));
+      return allReflect(
+        lo.flatten([
+          delta.added.map(add => {
+            add[a.foreignKey] = instance[a.source.primaryKeyAttribute];
+            return updateOrInsert(a.target, add, include, t);
+          }),
+          delta.removed.map(removed => removed.destroy({ transaction: t })),
+          delta.existing.map(existing => updateDeep(a.target, existing.current, include, t)) ]
+        ));
+      });
 
   var reload = (instance, include, prune) => 
     instance.reload({ include: include }).tap(inst => {
