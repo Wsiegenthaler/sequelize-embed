@@ -1,18 +1,18 @@
 
+var lo = require('lodash');
+var Promise = require('bluebird');
+
+var { allReflect, diff, isModelInstance, pkId, isHasOne, isHasMany, isBelongsTo, isBelongsToMany } = require('./util');
+
+
 function IndexExport(sequelize) {
-
-  var lo = require('lodash');
-  var Promise = require('bluebird');
-
-  var { allReflect, diff, isModelInstance, pkId, isHasOne, isHasMany, isBelongsTo, isBelongsToMany } = require('./util');
- 
 
   /* Default options for insert/update */
   var defaults = { pruneFks: true, reload: true };
 
   /* Removes redundant foreign keys from structure */
   var pruneFks = (instance, include) => {
-    var clearFk = (inst, key) => !!inst ? inst.set(key) : null;
+    var clearFk = (inst, key) => inst ? inst.set(key) : null;
     if (lo.isArray(include)) {
       include.map(inc => {
         var a = inc.association;
@@ -77,7 +77,7 @@ function IndexExport(sequelize) {
 
     /* preserve version attribute for optimistic locking */
     var ver = model.options.version;
-    if (!!ver) {
+    if (ver) {
       ver = lo.isString(ver) ? ver : 'version';
       inst.set(ver, values[ver], { raw: true });
     }
@@ -99,10 +99,10 @@ function IndexExport(sequelize) {
     var update = (inst, val) => updateDeep(model, val, include, t)
 
     var pk = model.primaryKeyAttribute, pkVal = val[pk];
-    if (!!pkVal) {
+    if (pkVal) {
       /* Association may exist, update if found else insert */
       return model.findById(pkVal).then(curVal => {
-        if (!!curVal) return update(curVal, val);
+        if (curVal) return update(curVal, val);
         else return insert(val);
       });
     } else return insert(val);
@@ -125,7 +125,7 @@ function IndexExport(sequelize) {
       if (!lo.isUndefined(val)) {
         if (val !== null) {
           var inc = includeMap.get(a);
-          return Promise.resolve(!!inc ? updateOrInsert(a.target, val, inc.include, t) : val).tap(link(a));
+          return Promise.resolve(inc ? updateOrInsert(a.target, val, inc.include, t) : val).tap(link(a));
         } else unlink(a);
       }
     }));
@@ -155,7 +155,7 @@ function IndexExport(sequelize) {
       var a = inc.association, as = a.associationAccessor, vals = data[as];
       if (lo.isUndefined(vals)) {
         // no value of given for update, skip
-      } else if (lo.isArray(vals) || vals == null) {
+      } else if (lo.isArray(vals) || vals === null) {
         vals = vals || [];
         return a.get(instance).then(lastVals => {
           var delta = diff(vals, lastVals, pkId(a.target));

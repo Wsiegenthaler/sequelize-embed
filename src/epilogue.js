@@ -1,14 +1,13 @@
+var lo = require('lodash');
+var epilogue = require('epilogue');
+
+var embed = require('./index')(sequelize);
+
+var { insert, update } = embed;
+var { pruneFks, isBelongsTo, isBelongsToMany } = embed.util;
+
+
 function EpilogueExport(sequelize) {
-
-  // ------------------ Dependencies -------------------
-
-  var lo = require('lodash');
-  var epilogue = require('epilogue');
-
-  var embed = require('./index')(sequelize);
-
-  var { insert, update } = embed;
-  var { pruneFks, isBelongsTo, isBelongsToMany } = embed.util;
 
   // ------------------ Middleware factory -------------------
   
