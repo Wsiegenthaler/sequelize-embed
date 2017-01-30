@@ -7,5 +7,7 @@ node_js:
 
 script: "npm run-script test-travis"
 
-after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+after_script:
+  "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+  "CODECLIMATE_REPO_TOKEN=f3c4a707857bad640236165a723caff4177dbb8673662417eb2b9755fe3e95f9 ./node_modules/codeclimate-test-reporter/bin/codeclimate.js < ./coverage/lcov.info"
 
