@@ -19,8 +19,9 @@ var allReflect = promises =>
  * either changed or unchanged). Elements are matched by the provided 'id' accessor.
  */
 var diff = (current, original, id) => {
-  var prep = val => lo.filter(lo.isArray(val) ? val : [val], v => !!v);
-  current = prep(current), original = prep(original);
+  var prepArray = val => lo.filter(lo.isArray(val) ? val : [val], v => !!v);
+  current = prepArray(current);
+  original = prepArray(original);
   return {
     added: lo.differenceBy(current, original, id),
     removed: lo.differenceBy(original, current, id),
