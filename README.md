@@ -168,7 +168,6 @@ Since the underlying data is normalized, completing an `update` or `insert` oper
 
 ```javascript
 var embed = require('sequelize-embed')(sequelize)
-var epilogueEmbed = embed.EpilogueEmbed(epilogue)
 
 var includeOnRead = ...  // include for get
 var includeOnWrite = ... // include for put/post
@@ -182,7 +181,8 @@ var resource = epilogue.resource({
 });
 
 // add middleware to the resource, specifying includes
-resource.use(epilogueEmbed(includeOnWrite))
+var middleware = embed.Epilogue(epilogue)
+resource.use(middleware(includeOnWrite))
 ```
 
 ## License

@@ -2,7 +2,7 @@
 function IndexExport(sequelize) {
 
   var embed = require('./embed')(sequelize);
-  embed.EpilogueEmbed = epilogue => require('./epilogue')(sequelize, epilogue);
+  embed.Epilogue = epilogue => require('./epilogue')(embed, sequelize, epilogue);
 
   return embed;
 }
