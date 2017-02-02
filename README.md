@@ -167,7 +167,8 @@ Since the underlying data is normalized, completing an `update` or `insert` oper
 `sequelize-embed` also provides Epilogue middleware for automatically updating associations during PUT and POST operations. Embedding associations in the root model can give your REST api semantics more akin to a document-oriented datastore.
 
 ```javascript
-var epilogueEmbed = require('sequelize-embed/epilogue')(sequelize)
+var embed = require('sequelize-embed')(sequelize)
+var epilogueEmbed = embed.EpilogueEmbed(epilogue)
 
 var includeOnRead = ...  // include for get
 var includeOnWrite = ... // include for put/post

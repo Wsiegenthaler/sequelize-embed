@@ -1,13 +1,9 @@
 var lo = require('lodash');
-var epilogue = require('epilogue');
 
-var embed = require('./index')(sequelize);
+function EpilogueExport(embed, sequelize, epilogue) {
 
-var { insert, update } = embed;
-var { pruneFks } = embed.util;
-
-
-function EpilogueExport(sequelize) {
+  var { insert, update } = embed;
+  var { pruneFks } = embed.util;
 
   // ------------------ Middleware factory -------------------
   
