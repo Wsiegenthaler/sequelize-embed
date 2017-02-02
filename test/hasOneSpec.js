@@ -13,7 +13,7 @@ var mkIncludes = helpers.includes, mkInclude = helpers.include;
 /* --- setup --- */
 
 var include = mkIncludes(mkInclude(Order.Audit));
-var opts = { readInclude: include };
+var opts = { reload: { include } };
 
 
 /* --- tests --- */

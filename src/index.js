@@ -3,47 +3,26 @@ var lo = require('lodash');
 var Promise = require('bluebird');
 
 var { allReflect, diff, isModelInstance, pkId, isHasOne, isHasMany, isBelongsTo, isBelongsToMany } = require('./util');
+var helpers = require('./include-helpers');
 
 
 function IndexExport(sequelize) {
 
   /* Core api */
-  var insert = (model, values, include, options) => apiWrap(t => insertDeep(model, values, include, t), options)  
-  var update = (model, values, include, options) => apiWrap(t => updateDeep(model, values, include, t), options) 
+  var insert = (model, values, include, options) => apiWrap(t => insertDeep(model, values, include, t), model, include, options)  
+  var update = (model, values, include, options) => apiWrap(t => updateDeep(model, values, include, t), model, include, options) 
 
-  /* Default options for insert/update */
-  var defaults = { pruneFks: true, reload: true };
+  /* Default options for core api */
+  var defaults = { reload: true };
 
-  /* Removes redundant foreign keys from structure */
-  var pruneFks = (instance, include) => {
-    var clearFk = (inst, key) => inst ? inst.set(key) : null;
-    if (lo.isArray(include)) {
-      include.map(inc => {
-        var a = inc.association;
-        if (isBelongsTo(a)) {
-          clearFk(instance, a.foreignKey);
-          pruneFks(instance[a.associationAccessor], inc.include);
-        } else if (isHasOne(a)) {
-          clearFk(instance[a.associationAccessor], a.foreignKey);
-          pruneFks(instance[a.associationAccessor], inc.include);
-        } else if (isHasMany(a)) {
-          instance[a.associationAccessor].map(child => {
-            clearFk(child, a.foreignKey);
-            pruneFks(child, inc.include);
-          });
-        }
-      });
-    }
-  };
-
-  var apiWrap = (action, options) => {
-    options = lo.defaults(options, defaults);
+  var apiWrap = (action, model, include, options) => {
+    options = lo.merge(defaults, options);
     var externalTx = lo.isObject(options.transaction);
     return (externalTx ? Promise.resolve(options.transaction) : sequelize.transaction())
       .then(t => action(t)
         .tap(commit(t, externalTx))
         .catch(rollback(t, externalTx))
-        .then(inst => !options.reload ? Promise.resolve(inst) : reload(inst, options.readInclude, options.pruneFks)))
+        .then(inst => reload(model, inst, include, options.reload)))
   };
 
   var traverseDeep = (model, values, include, t, action) => 
@@ -51,8 +30,8 @@ function IndexExport(sequelize) {
       .then(action)
       .then(inst => updateDownstream(inst, values, include, t))
 
-  var insertDeep = (model, values, include, t) => traverseDeep(model, values, include, t, () => insertSelf(model, values, t))
-  var updateDeep = (model, values, include, t) => traverseDeep(model, values, include, t, () => updateSelf(model, values, t))
+  var insertDeep = (model, values, include, t) => traverseDeep(model, values, include || [], t, () => insertSelf(model, values, t))
+  var updateDeep = (model, values, include, t) => traverseDeep(model, values, include || [], t, () => updateSelf(model, values, t))
 
   var commit = (t, skip) => () => {
     if (!skip) return t.commit()
@@ -87,17 +66,13 @@ function IndexExport(sequelize) {
   }
 
   var updateOrInsert = (model, val, include, t) => {
-    var insert = (val) => insertDeep(model, val, include, t)
-    var update = (inst, val) => updateDeep(model, val, include, t)
-
-    var pk = model.primaryKeyAttribute, pkVal = val[pk];
+    var pkVal = val[model.primaryKeyAttribute];
     if (pkVal) {
-      /* Association may exist, update if found else insert */
-      return model.findById(pkVal).then(curVal => {
-        if (curVal) return update(curVal, val);
-        else return insert(val);
-      });
-    } else return insert(val);
+      return model.findById(pkVal).then(curVal =>
+        lo.isObject(curVal) ?
+          updateDeep(model, val, include, t) :
+          insertDeep(model, val, include, t));
+    } else return insertDeep(model, val, include, t);
   }
 
   var updateBelongsTos = (model, values, include, t) => {
@@ -149,10 +124,60 @@ function IndexExport(sequelize) {
         ));
       });
 
-  var reload = (instance, include, prune) => 
-    instance.reload({ include: include }).tap(inst => {
-      if (!lo.isBoolean(prune) || !!prune) pruneFks(inst, include);
+  /* Removes redundant foreign keys from structure */
+  var pruneFks = (model, instance, include) => {
+    var clearFk = (model, inst, key) => {
+      if (inst && inst.dataValues) {
+        if (!lo.some(model.primaryKeyAttributes, pk => pk===key)) {
+          delete inst.dataValues[key];
+        } 
+      }
+    }
+    if (lo.isArray(include)) {
+      include.map(inc => {
+        var a = inc.association;
+        if (isBelongsTo(a)) {
+          clearFk(model, instance, a.foreignKey);
+          pruneFks(inc.model, instance[a.associationAccessor], inc.include);
+        } else if (isHasOne(a)) {
+          clearFk(inc.model, instance[a.associationAccessor], a.foreignKey);
+          pruneFks(inc.model, instance[a.associationAccessor], inc.include);
+        } else if (isHasMany(a)) {
+          instance[a.associationAccessor].map(child => {
+            clearFk(inc.model, child, a.foreignKey);
+            pruneFks(inc.model, child, inc.include);
+          });
+        }
+      });
+    }
+  };
+
+  /* Converts sequelize instances to plain objects (dataValues) */
+  var plainify = (instance, include) => {
+    if (!lo.isObject(instance)) return instance;
+    var clone = lo.clone(instance.dataValues);
+    include.map(inc => {
+      var a = inc.association, as = a.associationAccessor, vals = instance[as];
+      if (isBelongsTo(a) || isHasOne(a))
+        lo.set(clone, as, plainify(vals, inc.include));
+      else if (isHasMany(a))
+        lo.set(clone, as, vals.map(val => plainify(val, inc.include)));
     });
+    return clone;
+  };
+
+  var reload = (model, instance, include, options) => {
+    var defaults = { include, pruneFks: true, plain: false };
+    if (lo.isObject(options)) lo.merge(defaults, options);
+    else if (options) options = defaults;
+    else return Promise.resolve(instance);
+    return instance.reload({ include: options.include }).then(inst => {
+      if (!lo.isBoolean(options.pruneFks) || !!options.pruneFks) pruneFks(model, inst, options.include);
+      if (!lo.isBoolean(options.plain) || !!options.plain) {
+        return plainify(inst, options.include);
+      } else return inst;
+    })
+  };
 
 
   // ------------------ Exports -------------------
@@ -160,7 +185,12 @@ function IndexExport(sequelize) {
   return {
     insert,
     update,
-    util: { pruneFks, isHasOne, isHasMany, isBelongsTo, isBelongsToMany }
+    util: {
+      include: helpers.include,
+      includes: helpers.includes,
+      pruneFks,
+      isHasOne, isHasMany, isBelongsTo, isBelongsToMany
+    }
   };
 }
 

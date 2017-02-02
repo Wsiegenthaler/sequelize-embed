@@ -4,25 +4,20 @@ var epilogue = require('epilogue');
 var embed = require('./index')(sequelize);
 
 var { insert, update } = embed;
-var { pruneFks, isBelongsTo, isBelongsToMany } = embed.util;
+var { pruneFks } = embed.util;
 
 
 function EpilogueExport(sequelize) {
 
   // ------------------ Middleware factory -------------------
   
-  var factory = (options) => ({
+  var factory = (include, options) => ({
     extraConfiguration: (resource) => {
-      options = lo.defaults(options, { pruneFks: true });
+      options = lo.defaults(options, { reload: { plain: false, pruneFks: true } });
 
       /* Override standard includes */
-      var readInclude = options.readInclude || lo.clone(resource.include);
+      options.reload.include = options.reload.include || lo.clone(resource.include);
       resource.include.splice(0, resource.include.length);
-
-      /* Determine includes to embed. If not passed as an option, defaults to HasOne and HasMany of the read includes */
-      var embedInclude = options.embedInclude;
-      if (lo.isUndefined(embedInclude)) 
-        embedInclude = lo.cloneDeep(readInclude.filter(inc => !isBelongsTo(inc.association) && !isBelongsToMany(inc.association)));
 
       var handleError = err => {
         if (err.constructor === sequelize.OptimisticLockError)
@@ -34,14 +29,14 @@ function EpilogueExport(sequelize) {
 
       /* Read all association we want as part of the presentation */
       resource.read.fetch.before((req, res, ctx) => {
-        ctx.include = readInclude;
+        ctx.include = options.reload.include;
         ctx.continue();
       });
 
       /* Prune foreign keys before sending result */
-      if (options.pruneFks) {
+      if (options.reload.pruneFks) {
         resource.read.send.before((req, res, ctx) => {
-          pruneFks(ctx.instance, readInclude);
+          pruneFks(ctx.instance, options.reload.include);
           ctx.continue();
         });
       }
@@ -50,7 +45,7 @@ function EpilogueExport(sequelize) {
 
       /* Restore this models fks and include all embedded associations for insertion */
       resource.create.write.before((req, res, ctx) => 
-        insert(resource.model, req.body, embedInclude, { readInclude, pruneFks: options.pruneFks })
+        insert(resource.model, req.body, include, options)
           .then(inst => ctx.instance = inst)
           .catch(handleError)
           .then(ctx.skip));
@@ -62,7 +57,7 @@ function EpilogueExport(sequelize) {
 
       /* Perform updates and skip the default write milestone */
       resource.update.write.before((req, res, ctx) => 
-        update(resource.model, req.body, embedInclude, { readInclude, pruneFks: options.pruneFks })
+        update(resource.model, req.body, include, options)
           .then(inst => ctx.instance = inst)
           .catch(handleError)
           .then(ctx.skip));

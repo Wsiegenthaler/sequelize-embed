@@ -19,7 +19,7 @@ describe('nested belongsTo', () => {
   describe('within hasMany', () => {
 
     var include = mkIncludes(mkInclude(Order.Items, mkInclude(Item.ItemType)));
-    var opts = { readInclude: include };
+    var opts = { reload: { include } };
 
     describe('which exists', () => {
 
@@ -123,7 +123,7 @@ describe('nested belongsTo', () => {
   describe('within belongsTo', () => {
 
     var include = mkIncludes(mkInclude(Order.Customer, mkInclude(Customer.Region)));
-    var opts = { readInclude: include };
+    var opts = { reload: { include } };
 
     describe('which exists', () => {
 
@@ -240,7 +240,7 @@ describe('nested hasMany', () => {
   describe('within hasMany', () => {
 
     var include = mkIncludes(mkInclude(Order.Notes, mkInclude(Note.Flags)));
-    var opts = { readInclude: include };
+    var opts = { reload: { include } };
 
     describe('which exists', () => {
 
@@ -384,7 +384,7 @@ describe('nested hasMany', () => {
   describe('within belongsTo', () => {
 
     var include = mkIncludes(mkInclude(Order.Customer, mkInclude(Customer.Region)));
-    var opts = { readInclude: include };
+    var opts = { reload: { include } };
 
     describe('which exists', () => {
 

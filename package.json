@@ -1,7 +1,7 @@
 {
   "name": "sequelize-embed",
   "version": "0.1.0",
-  "description": "Update and Insert for sequelize models with nested associations",
+  "description": "Easily insert and update sequelize models with deeply nested associations",
   "main": "src/index.js",
   "scripts": {
     "test": "./node_modules/jasmine-node/bin/jasmine-node ./test",
@@ -11,18 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/wsiegenthaler/sequelize-embed.git"
   },
-  "keywords": [
-    "sequelize",
-    "associations",
-    "model",
-    "sync",
-    "deep",
-    "embed",
-    "json",
-    "document",
-    "epilogue",
-    "rest"
-  ],
+  "keywords": [ "sequelize", "associations", "model", "sync", "deep", "embed", "json", "document", "epilogue", "rest" ],
   "author": "Weston Siegenthaler",
   "license": "BSD-3-Clause",
   "bugs": {

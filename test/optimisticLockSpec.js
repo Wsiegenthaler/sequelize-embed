@@ -21,7 +21,8 @@ var LockedOrder = sequelize.define('LockedOrder', {
 LockedOrder.Customer = LockedOrder.belongsTo(Customer, { as: 'customer' })
 
 var include = mkIncludes(mkInclude(LockedOrder.Customer));
-var opts = { readInclude: include };
+var opts = { reload: { include } };
+
 
 /* --- tests --- */
 
