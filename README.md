@@ -8,15 +8,14 @@
 
 *Easily insert and update sequelize models with deeply nested associations*
 
-
 While Sequelize will retrieve nested assocations via the `include` option, it does not provide the ability to write them. This module allows for easy synchronization of nested associations by recursively inserting new, updating existing, or deleting removed association values.
 
 * Synchronizes nested associations in a single atomic operation
 * Prunes redundant foreign keys and later infers them
-* Works well with optimistic locking in *Sequelize* v4
+* Works with optimistic locking in *Sequelize v4*
 * Includes *Epilogue* middleware for document-oriented PUT/POST
 
-## API
+# API
 
 ##### `insert(model, values, include, options)`
 
@@ -26,36 +25,43 @@ Inserts a new record given `values` and syncronizes nested associations specifie
 
 Updates the record corresponding to `values` and syncronizes nested associations specified by `include`.
 
-> ###### model
+> ##### model
 >
 > The sequelize model of the root of the structure.
 >
-> ###### values
+> ##### values
 >
 > Object representing the values to be written, including any nested structure.
 >
-> ###### include
+> ##### include
 >
 > Array specifying the nested associations to be embedded. The `include` parameter is recursive and is usually a subset of those passed to `Model.findById/One/All`.
 >
 > ##### options
 >
-> ####### transaction
-> 
-> The transaction to be used. If not supplied, one will be created internally.
->
-> ####### reload
-> 
-> Whether to reload and return the full instance after success (default `true`). May also be an object specifying further options:
-> 
-> * `include`: The nested associations to be read and returned. Defaults to the `include` parameter used in the write.
-> * `plain`: Return plain object instead of Sequelize instances. (default `true`)
-> * `pruneFks`: Whether to prune redundant foreign keys. (default `true`)
->
+> > ###### transaction
+> >
+> > The transaction to be used. If not supplied, one will be created internally.
+> >
+> > ###### reload
+> >
+> > Whether to reload and return the full instance after success. May also be an object specifying further options:
+> > >
+> > > ###### include
+> > >
+> > > The nested associations to be read and returned. Defaults to the `include` parameter used in the write.
+> > >
+> > > ###### plain
+> > > 
+> > > Return plain object instead of Sequelize instances. (default `true`)
+> > > 
+> > > ###### pruneFks
+> > > 
+> > > Whether to prune redundant foreign keys. (default `true`)
 
-### Getting Started
+# Getting Started
 
-#### Install & Import
+### Install & Import
 
 ```javascript
 npm install --save sequelize-embed
@@ -65,7 +71,7 @@ npm install --save sequelize-embed
 var embed = require('sequelize-embed')(sequelize)
 ```
 
-#### An Example
+### An Example
 
 A test schema - an order can have items (hasMany), each of which is assigned a department (belongsTo):
 
@@ -153,7 +159,7 @@ embed.update(Order, order, itemsOnly, { reload: { include: itemsAndDept } })
 
 Since the underlying data is normalized, completing an `update` or `insert` operation requires many reads and writes in order to update the entire structure. For applications where performance is critical, be sure to restrict the total number of embedded associations and only embed those with reasonably low-cardinality.
 
-## Epilogue Middleware
+# Epilogue Middleware
 
 
 `sequelize-embed` also provides Epilogue middleware for automatically updating associations during PUT and POST operations. Embedding associations in the root model can give your REST api semantics more akin to a document-oriented datastore.
