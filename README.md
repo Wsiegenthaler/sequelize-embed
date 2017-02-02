@@ -16,13 +16,13 @@ While Sequelize will retrieve nested assocations via the `include` option, it do
 * Works well with optimistic locking in *Sequelize* v4
 * Includes *Epilogue* middleware for document-oriented PUT/POST
 
-### API
+## API
 
-#### `insert(model, values, include, options)`
+##### `insert(model, values, include, options)`
 
 Inserts a new record given `values` and syncronizes nested associations specified by `include`.
 
-#### `update(model, values, include, options)`
+##### `update(model, values, include, options)`
 
 Updates the record corresponding to `values` and syncronizes nested associations specified by `include`.
 
@@ -37,14 +37,14 @@ Updates the record corresponding to `values` and syncronizes nested associations
 > ###### include
 >
 > Array specifying the nested associations to be embedded. The `include` parameter is recursive and is usually a subset of those passed to `Model.findById/One/All`.
-
-##### options
-
-> ###### transaction
+>
+> ##### options
+>
+> ####### transaction
 > 
 > The transaction to be used. If not supplied, one will be created internally.
 >
-> ###### reload
+> ####### reload
 > 
 > Whether to reload and return the full instance after success (default `true`). May also be an object specifying further options:
 > 
@@ -158,7 +158,7 @@ Since the underlying data is normalized, completing an `update` or `insert` oper
 
 `sequelize-embed` also provides Epilogue middleware for automatically updating associations during PUT and POST operations. Embedding associations in the root model can give your REST api semantics more akin to a document-oriented datastore.
 
-`
+```javascript
 var epilogueEmbed = require('sequelize-embed/epilogue')
 
 var includeOnRead = ...  // include for get
@@ -173,7 +173,7 @@ var resource = epilogue.resource({
 
 // provide middleware
 resource.use(epilogueEmbed(includeOnWrite))
-`
+```
 
 ## License
 
