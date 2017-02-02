@@ -19,11 +19,11 @@ While Sequelize will retrieve nested assocations via the `include` option, it do
 
 ##### `insert(model, values, include, options)`
 
-Inserts a new record given `values` and syncronizes nested associations specified by `include`.
+Inserts a new record given `values` and synchronizes nested associations specified by `include`.
 
 ##### `update(model, values, include, options)`
 
-Updates the record corresponding to `values` and syncronizes nested associations specified by `include`.
+Updates the record corresponding to `values` and synchronizes nested associations specified by `include`.
 
 > ##### model
 >
@@ -61,19 +61,21 @@ Updates the record corresponding to `values` and syncronizes nested associations
 
 # Getting Started
 
-### Install & Import
+### Install
 
 ```javascript
 npm install --save sequelize-embed
 ```
 
+### An Example
+
+Import `sequelize-embed` and initialize with `sequelize`:
+
 ```javascript
 var embed = require('sequelize-embed')(sequelize)
 ```
 
-### An Example
-
-A test schema - an order can have items (hasMany), each of which is assigned a department (belongsTo):
+Setup an example schema - an *Order* can have *Items*, each of which is assigned a *Department*:
 
 ```javascript
 var Order = sequelize.define('Order', {})
@@ -165,7 +167,7 @@ Since the underlying data is normalized, completing an `update` or `insert` oper
 `sequelize-embed` also provides Epilogue middleware for automatically updating associations during PUT and POST operations. Embedding associations in the root model can give your REST api semantics more akin to a document-oriented datastore.
 
 ```javascript
-var epilogueEmbed = require('sequelize-embed/epilogue')
+var epilogueEmbed = require('sequelize-embed/epilogue')(sequelize)
 
 var includeOnRead = ...  // include for get
 var includeOnWrite = ... // include for put/post
@@ -174,10 +176,11 @@ var includeOnWrite = ... // include for put/post
 var resource = epilogue.resource({
   model: Model,
   include: includeOnRead,
-  associations: false
+  associations: false,
+  ...
 });
 
-// provide middleware
+// add middleware to the resource, specifying includes
 resource.use(epilogueEmbed(includeOnWrite))
 ```
 
