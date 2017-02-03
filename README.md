@@ -19,49 +19,49 @@ While Sequelize will retrieve nested assocations via the `include` option, it do
 
 ### Operations
 
-##### `insert(model, values, include, options)`
+#### `insert(model, values, include, options)`
 
 Inserts a new record given `values` and synchronizes nested associations specified by `include`.
 
-##### `update(model, values, include, options)`
+#### `update(model, values, include, options)`
 
 Updates the record corresponding to `values` and synchronizes nested associations specified by `include`.
 
 ### Parameters
 
-> ##### model
+##### model
+
+The sequelize model of the root of the structure.
+
+##### values
+
+Object representing the values to be written, including any nested structure.
+
+##### include
+
+Array specifying the nested associations to be embedded. The `include` parameter is recursive and is usually a subset of those passed to `Model.findById/One/All`.
+
+##### options
+
+> ###### transaction
 >
-> The sequelize model of the root of the structure.
+> The transaction to be used. If not supplied, one will be created internally.
 >
-> ##### values
+> ###### reload
 >
-> Object representing the values to be written, including any nested structure.
->
-> ##### include
->
-> Array specifying the nested associations to be embedded. The `include` parameter is recursive and is usually a subset of those passed to `Model.findById/One/All`.
->
-> ##### options
->
-> > ###### transaction
+> Whether to reload and return the full instance after success. May also be an object specifying further options:
 > >
-> > The transaction to be used. If not supplied, one will be created internally.
+> > ###### include
 > >
-> > ###### reload
+> > The nested associations to be read and returned. Defaults to the `include` parameter used in the write.
 > >
-> > Whether to reload and return the full instance after success. May also be an object specifying further options:
-> > >
-> > > ###### include
-> > >
-> > > The nested associations to be read and returned. Defaults to the `include` parameter used in the write.
-> > >
-> > > ###### plain
-> > > 
-> > > Return plain object instead of Sequelize instances. (default `true`)
-> > > 
-> > > ###### pruneFks
-> > > 
-> > > Whether to prune redundant foreign keys. (default `true`)
+> > ###### plain
+> > 
+> > Return plain object instead of Sequelize instances. (default `true`)
+> > 
+> > ###### pruneFks
+> > 
+> > Whether to prune redundant foreign keys. (default `true`)
 
 # Getting Started
 
