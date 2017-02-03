@@ -29,37 +29,37 @@ Updates the record corresponding to `values` and synchronizes nested association
 
 ### Parameters
 
-##### model
+#### model
 
 The sequelize model of the root of the structure.
 
-##### values
+#### values
 
 Object representing the values to be written, including any nested structure.
 
-##### include
+#### include
 
 Array specifying the nested associations to be embedded. The `include` parameter is recursive and is usually a subset of those passed to `Model.findById/One/All`.
 
-##### options
+#### options
 
-> ###### transaction
+> ##### transaction
 >
 > The transaction to be used. If not supplied, one will be created internally.
 >
-> ###### reload
+> ##### reload
 >
 > Whether to reload and return the full instance after success. May also be an object specifying further options:
 > >
-> > ###### include
+> > ##### include
 > >
 > > The nested associations to be read and returned. Defaults to the `include` parameter used in the write.
 > >
-> > ###### plain
+> > ##### plain
 > > 
 > > Return plain object instead of Sequelize instances. (default `true`)
 > > 
-> > ###### pruneFks
+> > ##### pruneFks
 > > 
 > > Whether to prune redundant foreign keys. (default `true`)
 
