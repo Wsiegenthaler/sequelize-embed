@@ -17,7 +17,7 @@ While Sequelize will retrieve nested assocations via the `include` option, it do
 
 # API
 
-#### Operations
+### Operations
 
 ##### `insert(model, values, include, options)`
 
@@ -27,7 +27,7 @@ Inserts a new record given `values` and synchronizes nested associations specifi
 
 Updates the record corresponding to `values` and synchronizes nested associations specified by `include`.
 
-#### Parameters
+### Parameters
 
 > ##### model
 >
@@ -162,7 +162,7 @@ embed.update(Order, order, itemsOnly, { reload: { include: itemsAndDept } })
 
 ### Performance
 
-Since the underlying data is normalized, completing an `update` or `insert` operation requires many reads and writes in order to update the entire structure. For applications where performance is critical, be sure to restrict the total number of embedded associations and only embed those with reasonably low-cardinality.
+Since the underlying data is normalized, completing an `update` or `insert` operation requires many reads and writes to synchronize the entire structure. For applications where performance is critical, be sure to restrict the total number of embedded associations and only embed those with reasonably low-cardinality.
 
 # Epilogue Middleware
 
