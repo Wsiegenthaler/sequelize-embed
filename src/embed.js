@@ -186,8 +186,7 @@ function EmbedExport(sequelize) {
     insert,
     update,
     util: {
-      include: helpers.include,
-      includes: helpers.includes,
+      helpers,
       pruneFks,
       isHasOne, isHasMany, isBelongsTo, isBelongsToMany
     }

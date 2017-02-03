@@ -5,8 +5,7 @@ var { sequelize, models, sync, clear } = require('./common');
 var { Customer, Item, ItemType, Order, Item } = models;
 
 var embed = require('../src/index')(sequelize);
-
-var helpers = require('../src/include-helpers');
+var helpers = embed.util.helpers;
 var mkIncludes = helpers.includes, mkInclude = helpers.include;
 
 
