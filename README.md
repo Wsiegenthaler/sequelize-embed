@@ -17,6 +17,8 @@ While Sequelize will retrieve nested assocations via the `include` option, it do
 
 # API
 
+#### Operations
+
 ##### `insert(model, values, include, options)`
 
 Inserts a new record given `values` and synchronizes nested associations specified by `include`.
@@ -24,6 +26,8 @@ Inserts a new record given `values` and synchronizes nested associations specifi
 ##### `update(model, values, include, options)`
 
 Updates the record corresponding to `values` and synchronizes nested associations specified by `include`.
+
+#### Parameters
 
 > ##### model
 >
@@ -67,7 +71,7 @@ Updates the record corresponding to `values` and synchronizes nested association
 npm install --save sequelize-embed
 ```
 
-### An Example
+### Basic Example
 
 Import `sequelize-embed` and initialize with `sequelize`:
 
@@ -86,7 +90,7 @@ Order.Items = Order.hasMany(Item, { as: 'items', foreignKey: 'orderId' })
 Item.Department = Item.belongsTo(Department, { as: 'department', foreignKey: 'deptId' })`
 ```
 
-Use the `util.include` helper to define the associations we wish to include. Here `itemsOnly` will update `Items` while `itemsAndDept` will update `Items` *and* `Departments`.
+Use the `embed.util.include` helper to define the associations we wish to include. Here `itemsOnly` will update `Items` while `itemsAndDept` will update `Items` *and* `Departments`.
 
 ```javascript
 var include = embed.util.include
@@ -122,7 +126,7 @@ embed.update(Order, order, itemsAndDept)
 // items: [ { id: 1, quantity: '2', department: { id: 2, name: 'dairy' } } ]
 ```
 
-Since departments are shared between orders, we probably don't want to include them when updating. Let's add another item, this time including just `itemsOnly` and being sure to specify a department known to exist:
+For the purposes of demonstration we've included `Departments` in our update, but since a `Department` is shared between orders we probably wouldn't want to include them when updating an order. Let's add another item, this time including just `itemsOnly` and being sure to specify a department known to exist:
 
 ```javascript
 var order = {
@@ -139,8 +143,7 @@ embed.update(Order, order, itemsOnly, { reload: { include: itemsAndDept } })
 //   { id: 1, quantity: '2', department: { id: 2, name: 'dairy' } },
 //   { id: 2, quantity: '3', department: { id: 1, name: 'produce' } } ]
 ```
-
-Notice that we now pass `itemsAndDept` as the `reload.include` option which will include the `department` field in the result despite it not being updated.
+Notice that the new item was correctly assigned to the `produce` department despite `Departments` not being included in the update. Since *belongs to* foreign keys are on the source, they are always mapped back from any embedded values, even if a value isn't included for update itself. Also, we now pass `itemsAndDept` as the `reload.include` option which will include the `department` field in the result despite it not being updated.
 
 Finally, remove the first item and reassign the second to the `dairy` department:
 
@@ -164,7 +167,7 @@ Since the underlying data is normalized, completing an `update` or `insert` oper
 # Epilogue Middleware
 
 
-`sequelize-embed` also provides Epilogue middleware for automatically updating associations during PUT and POST operations. Embedding associations in the root model can give your REST api semantics more akin to a document-oriented datastore.
+*Sequelize Embed* also provides *Epilogue* middleware for automatically updating associations during PUT and POST operations. This can greatly simplify client development by giving your REST api the feel of a document-oriented database.
 
 ```javascript
 var embed = require('sequelize-embed')(sequelize)
