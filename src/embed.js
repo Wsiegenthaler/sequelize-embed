@@ -112,13 +112,13 @@ function EmbedExport(sequelize) {
 
   var updateHasValues = (instance, vals, a, include, t) => 
     a.get(instance).then(lastVals => {
+      var array = vals => lo.filter(lo.isArray(vals) ? vals : [vals], v => !!v)
+      lastVals = array(lastVals)
+      vals = array(vals).map(v => lo.set(v, a.foreignKey, instance[a.sourceKey]));
       var delta = diff(vals, lastVals, pkId(a.target));
       return allReflect(
         lo.flatten([
-          delta.added.map(add => {
-            add[a.foreignKey] = instance[a.source.primaryKeyAttribute];
-            return updateOrInsert(a.target, add, include, t);
-          }),
+          delta.added.map(add => updateOrInsert(a.target, add, include, t)),
           delta.removed.map(removed => removed.destroy({ transaction: t })),
           delta.existing.map(existing => updateDeep(a.target, existing.current, include, t)) ]
         ));
@@ -128,9 +128,7 @@ function EmbedExport(sequelize) {
   var pruneFks = (model, instance, include) => {
     var clearFk = (model, inst, key) => {
       if (inst && inst.dataValues) {
-        if (!lo.some(model.primaryKeyAttributes, pk => pk===key)) {
-          delete inst.dataValues[key];
-        } 
+        delete inst.dataValues[key];
       }
     }
     if (lo.isArray(include)) {

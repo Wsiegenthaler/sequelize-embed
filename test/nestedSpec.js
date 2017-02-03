@@ -246,7 +246,7 @@ describe('nested hasMany', () => {
       it('should insert nested value if doesn\'t exist', done => {
         Order.create({ name: 'o1' }).then(o =>
           Note.create({ orderId: o.id, body: 'foo' }).then(n =>
-            embed.update(Order, { id: o.id, notes: [{ orderId: o.id, flags: [{ code: 'bar' }] }] }, include, opts)
+            embed.update(Order, { id: o.id, notes: [{ flags: [{ code: 'bar' }] }] }, include, opts)
               .then(result => {
                 expect(result.notes.length).toBe(1);
                 expect(result.notes[0].body).toBe('foo');
@@ -260,7 +260,7 @@ describe('nested hasMany', () => {
       it('should insert nested value if doesn\'t exist even if pk is specified', done => {
         Order.create({ name: 'o1' }).then(o =>
           Note.create({ orderId: o.id, body: 'foo' }).then(n =>
-            embed.update(Order, { id: o.id, notes: [{ orderId: o.id, flags: [{ id: 123, code: 'bar' }] }] }, include, opts)
+            embed.update(Order, { id: o.id, notes: [{ flags: [{ id: 123, code: 'bar' }] }] }, include, opts)
               .then(result => {
                 expect(result.notes.length).toBe(1);
                 expect(result.notes[0].body).toBe('foo');
@@ -276,7 +276,7 @@ describe('nested hasMany', () => {
         Order.create({ name: 'o1' }).then(o =>
           Note.create({ orderId: o.id, body: 'foo' }).then(n =>
             Flag.create({ orderId: o.id, code: 'bar' }).then(f =>
-              embed.update(Order, { id: o.id, notes: [{ orderId: o.id, flags: [{ id: f.id, code: 'baz' }] }] }, include, opts)
+              embed.update(Order, { id: o.id, notes: [{ flags: [{ id: f.id, code: 'baz' }] }] }, include, opts)
                 .then(result => {
                   expect(result.notes.length).toBe(1);
                   expect(result.notes[0].body).toBe('foo');
@@ -292,10 +292,9 @@ describe('nested hasMany', () => {
         Order.create({ name: 'o1' }).then(o =>
           Note.create({ orderId: o.id, body: 'foo' }).then(n =>
             Flag.create({ orderId: o.id, code: 'bar' }).then(f =>
-              embed.update(Order, { id: o.id, notes: [{ orderId: o.id, flags: null }] }, include, opts)
+              embed.update(Order, { id: o.id, notes: [{ flags: null }] }, include, opts)
                 .then(result => {
                   expect(result.notes.length).toBe(1);
-                  expect(result.notes[0].orderId).toBe(o.id);
                   expect(result.notes[0].body).toBe('foo');
                   expect(result.notes[0].flags.length).toBe(0);
                   done();
@@ -306,10 +305,9 @@ describe('nested hasMany', () => {
         Order.create({ name: 'o1' }).then(o =>
           Note.create({ orderId: o.id, body: 'foo' }).then(n =>
             Flag.create({ orderId: o.id, code: 'bar' }).then(f =>
-              embed.update(Order, { id: o.id, notes: [{ orderId: o.id, flags: [] }] }, include, opts)
+              embed.update(Order, { id: o.id, notes: [{ flags: [] }] }, include, opts)
                 .then(result => {
                   expect(result.notes.length).toBe(1);
-                  expect(result.notes[0].orderId).toBe(o.id);
                   expect(result.notes[0].body).toBe('foo');
                   expect(result.notes[0].flags.length).toBe(0);
                   done();
@@ -321,10 +319,9 @@ describe('nested hasMany', () => {
         Order.create({ name: 'o1' }).then(o =>
           Note.create({ orderId: o.id, body: 'foo' }).then(n =>
             Flag.create({ orderId: o.id, code: 'bar' }).then(f =>
-              embed.update(Order, { id: o.id, notes: [{ orderId: o.id, flags: [{ orderId: o.id, code: 'baz' }] }] }, include, opts)
+              embed.update(Order, { id: o.id, notes: [{ flags: [{ code: 'baz' }] }] }, include, opts)
                 .then(result => {
                   expect(result.notes.length).toBe(1);
-                  expect(result.notes[0].orderId).toBe(o.id);
                   expect(result.notes[0].body).toBe('foo');
                   expect(result.notes[0].flags.length).toBe(1);
                   expect(result.notes[0].flags[0].code).toBe('bar');
