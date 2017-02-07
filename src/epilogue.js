@@ -7,8 +7,8 @@ function EpilogueExport(embed, sequelize, epilogue) {
 
   // ------------------ Middleware factory -------------------
   
-  var factory = (model, include, options) => ({
-    extraConfiguration: (resource) => {
+  var factory = (include, options) => ({
+    extraConfiguration: resource => {
       options = lo.defaults(options, { reload: { plain: false, pruneFks: true } });
 
       /* Override standard includes */
@@ -32,7 +32,7 @@ function EpilogueExport(embed, sequelize, epilogue) {
       /* Prune foreign keys before sending result */
       if (options.reload.pruneFks) {
         resource.read.send.before((req, res, ctx) => {
-          pruneFks(model, ctx.instance, options.reload.include);
+          pruneFks(resource.model, ctx.instance, options.reload.include);
           ctx.continue();
         });
       }

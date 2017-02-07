@@ -185,7 +185,7 @@ var resource = epilogue.resource({
 
 // add middleware to the resource, specifying includes
 var middleware = embed.Epilogue(epilogue)
-resource.use(middleware(Model, includeOnWrite))
+resource.use(middleware(includeOnWrite))
 ```
 
 ## License
