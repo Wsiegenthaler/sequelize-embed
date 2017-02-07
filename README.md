@@ -45,7 +45,7 @@ Array specifying the nested associations to be embedded. The `include` parameter
 
 > ##### transaction
 >
-> The transaction to be used. If not supplied, one will be created internally.
+> The transaction to be used. When provided, invoking `commit` or `rollback` is the resonsibility of the caller. Otherwise, a transaction will be created automatically and committed when done.
 >
 > ##### reload
 >
@@ -185,7 +185,7 @@ var resource = epilogue.resource({
 
 // add middleware to the resource, specifying includes
 var middleware = embed.Epilogue(epilogue)
-resource.use(middleware(includeOnWrite))
+resource.use(middleware(Model, includeOnWrite))
 ```
 
 ## License
