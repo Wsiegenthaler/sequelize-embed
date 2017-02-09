@@ -65,12 +65,22 @@ function EmbedExport(sequelize) {
       .then(() => instance);
   }
 
+  /* Builds a new instance from the original and applies values */
+  var mergeInstance = (model, inst, vals, include) => {
+    inst.set(vals)
+    include.map(inc => {
+      var a = inc.association, as = a.associationAccessor;
+      inst[as] = vals[as];
+    })
+    return inst;
+  }
+
   var updateOrInsert = (model, val, include, t) => {
     var pkVal = val[model.primaryKeyAttribute];
     if (pkVal) {
       return model.findById(pkVal).then(curVal =>
         lo.isObject(curVal) ?
-          updateDeep(model, val, include, t) :
+          updateDeep(model, mergeInstance(model, curVal, val, include), include, t) :
           insertDeep(model, val, include, t));
     } else return insertDeep(model, val, include, t);
   }
@@ -120,7 +130,7 @@ function EmbedExport(sequelize) {
         lo.flatten([
           delta.added.map(add => updateOrInsert(a.target, add, include, t)),
           delta.removed.map(removed => removed.destroy({ transaction: t })),
-          delta.existing.map(existing => updateDeep(a.target, existing.current, include, t)) ]
+          delta.existing.map(existing => updateDeep(a.target, mergeInstance(a.target, existing.original, existing.current, include), include, t)) ]
         ));
       });
 
