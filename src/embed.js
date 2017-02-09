@@ -114,7 +114,7 @@ function EmbedExport(sequelize) {
     a.get(instance).then(lastVals => {
       var array = vals => lo.filter(lo.isArray(vals) ? vals : [vals], v => !!v)
       lastVals = array(lastVals)
-      vals = array(vals).map(v => lo.set(v, a.foreignKey, instance[a.sourceKey]));
+      vals = array(vals).map(v => lo.set(v, a.foreignKey, instance[a.sourceKey || a.source.primaryKeyAttribute]));
       var delta = diff(vals, lastVals, pkId(a.target));
       return allReflect(
         lo.flatten([
