@@ -9,17 +9,18 @@ var helpers = require('./include-helpers');
 function EmbedExport(sequelize) {
 
   /* Core api */
-  var insert = (model, values, include, options) => apiWrap(t => insertDeep(model, values, include, t), model, include, options)  
-  var update = (model, values, include, options) => apiWrap(t => updateDeep(model, values, include, t), model, include, options) 
+  var insert = (model, values, include, options) => apiWrap((inc, t) => insertDeep(model, values, inc, t), model, include, options)
+  var update = (model, values, include, options) => apiWrap((tnc, t) => updateDeep(model, values, inc, t), model, include, options) 
 
   /* Default options for core api */
   var defaults = { reload: true };
 
   var apiWrap = (action, model, include, options) => {
     options = lo.merge(defaults, options);
+    include = lo.cloneDeep(include);
     var externalTx = lo.isObject(options.transaction);
     return (externalTx ? Promise.resolve(options.transaction) : sequelize.transaction())
-      .then(t => action(t)
+      .then(t => action(include, t)
         .tap(commit(t, externalTx))
         .catch(rollback(t, externalTx))
         .then(inst => reload(model, inst, include, options.reload)))
