@@ -9,17 +9,18 @@ var helpers = require('./include-helpers');
 function EmbedExport(sequelize) {
 
   /* Core api */
-  var insert = (model, values, include, options) => apiWrap(t => insertDeep(model, values, include, t), model, include, options)  
-  var update = (model, values, include, options) => apiWrap(t => updateDeep(model, values, include, t), model, include, options) 
+  var insert = (model, values, include, options) => apiWrap((inc, t) => insertDeep(model, values, inc, t), model, include, options)
+  var update = (model, values, include, options) => apiWrap((inc, t) => updateDeep(model, values, inc, t), model, include, options) 
 
   /* Default options for core api */
   var defaults = { reload: true };
 
   var apiWrap = (action, model, include, options) => {
     options = lo.merge(defaults, options);
+    include = lo.cloneDeep(include);
     var externalTx = lo.isObject(options.transaction);
     return (externalTx ? Promise.resolve(options.transaction) : sequelize.transaction())
-      .then(t => action(t)
+      .then(t => action(include, t)
         .tap(commit(t, externalTx))
         .catch(rollback(t, externalTx))
         .then(inst => reload(model, inst, include, options.reload)))
@@ -65,12 +66,22 @@ function EmbedExport(sequelize) {
       .then(() => instance);
   }
 
+  /* Builds a new instance from the original and applies values */
+  var mergeInstance = (model, inst, vals, include) => {
+    inst.set(vals)
+    include.map(inc => {
+      var a = inc.association, as = a.associationAccessor;
+      inst[as] = vals[as];
+    })
+    return inst;
+  }
+
   var updateOrInsert = (model, val, include, t) => {
     var pkVal = val[model.primaryKeyAttribute];
     if (pkVal) {
       return model.findById(pkVal).then(curVal =>
         lo.isObject(curVal) ?
-          updateDeep(model, val, include, t) :
+          updateDeep(model, mergeInstance(model, curVal, val, include), include, t) :
           insertDeep(model, val, include, t));
     } else return insertDeep(model, val, include, t);
   }
@@ -86,12 +97,12 @@ function EmbedExport(sequelize) {
     }
 
     var associations = lo.values(model.associations).filter(isBelongsTo);
-    var includeMap = lo.reduce(include, (m, i) => m.set(i.association, i), new Map());
+    var includeMap = lo.reduce(include, (m, i) => m.set(i.association.associationAccessor, i), new Map());
     return allReflect(associations.map(a => {
       var as = a.associationAccessor, val = values[as];
       if (!lo.isUndefined(val)) {
         if (val !== null) {
-          var inc = includeMap.get(a);
+          var inc = includeMap.get(as);
           return Promise.resolve(inc ? updateOrInsert(a.target, val, inc.include, t) : val).tap(link(a));
         } else unlink(a);
       }
@@ -120,7 +131,7 @@ function EmbedExport(sequelize) {
         lo.flatten([
           delta.added.map(add => updateOrInsert(a.target, add, include, t)),
           delta.removed.map(removed => removed.destroy({ transaction: t })),
-          delta.existing.map(existing => updateDeep(a.target, existing.current, include, t)) ]
+          delta.existing.map(existing => updateDeep(a.target, mergeInstance(a.target, existing.original, existing.current, include), include, t)) ]
         ));
       });
 

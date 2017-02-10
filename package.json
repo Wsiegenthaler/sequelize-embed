@@ -1,6 +1,6 @@
 {
   "name": "sequelize-embed",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Easily insert and update sequelize models with deeply nested associations",
   "main": "src/index.js",
   "scripts": {
