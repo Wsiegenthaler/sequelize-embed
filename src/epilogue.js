@@ -23,7 +23,7 @@ function EpilogueExport(embed, sequelize, epilogue) {
 
       /* ----------------- READ ----------------- */
 
-      /* Read all association we want as part of the presentation */
+      /* Read all associations we want as part of the presentation */
       resource.read.fetch.before((req, res, ctx) => {
         ctx.include = options.reload.include;
         ctx.continue();
@@ -33,6 +33,22 @@ function EpilogueExport(embed, sequelize, epilogue) {
       if (options.reload.pruneFks) {
         resource.read.send.before((req, res, ctx) => {
           pruneFks(resource.model, ctx.instance, options.reload.include);
+          ctx.continue();
+        });
+      }
+
+      /* ----------------- LIST ----------------- */
+
+      /* List all associations we want as part of the presentation */
+      resource.list.fetch.before((req, res, ctx) => {
+        ctx.include = options.reload.include;
+        ctx.continue();
+      });
+
+      /* Prune foreign keys before sending result */
+      if (options.reload.pruneFks) {
+        resource.list.send.before((req, res, ctx) => {
+          ctx.instance.map(inst => pruneFks(resource.model, inst, options.reload.include));
           ctx.continue();
         });
       }
