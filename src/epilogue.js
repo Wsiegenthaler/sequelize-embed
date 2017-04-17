@@ -9,7 +9,7 @@ function EpilogueExport(embed, sequelize, epilogue) {
   
   var factory = (include, options) => ({
     extraConfiguration: resource => {
-      options = lo.defaults(options, { reload: { plain: false, pruneFks: true } });
+      options = lo.defaults(options, { reload: { plain: false, pruneFks: true }, prefetchUpdate: true });
 
       /* Override standard includes */
       options.reload.include = options.reload.include || lo.clone(resource.include);
@@ -65,14 +65,21 @@ function EpilogueExport(embed, sequelize, epilogue) {
       /* ----------------- UPDATE ----------------- */
 
       /* Prepare for read */
-      resource.update.fetch.before((req, res, ctx) => ctx.skip);
+      resource.update.fetch.before((req, res, ctx) => {
+        if (options.prefetchUpdate) {
+          ctx.include = options.reload.include;
+          ctx.continue();
+        } else ctx.skip();
+      });
 
       /* Perform updates and skip the default write milestone */
-      resource.update.write.before((req, res, ctx) => 
-        update(resource.model, req.body, include, options)
+      resource.update.write.before((req, res, ctx) => {
+        ctx.instance.set(req.body);
+        update(resource.model, ctx.instance, include, options)
           .then(inst => ctx.instance = inst)
           .catch(handleError)
-          .then(ctx.skip));
+          .then(ctx.skip);
+      });
     }
   });
 
