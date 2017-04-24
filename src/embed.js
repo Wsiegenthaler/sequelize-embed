@@ -52,6 +52,7 @@ function EmbedExport(sequelize) {
     if (ver) {
       ver = lo.isString(ver) ? ver : 'version';
       inst.set(ver, values[ver], { raw: true });
+      inst.changed(ver, true); // force update if versioned
     }
 
     return inst.save({ transaction: t });
