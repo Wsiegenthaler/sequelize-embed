@@ -42,7 +42,8 @@ function EmbedExport(sequelize) {
     if (!skip && !t.finished) return t.rollback().catch(lo.noop);
   }).throw(err);
 
-  var insertSelf = (model, values, t) => model.create(values, { transaction: t });
+  var insertSelf = (model, values, t) => 
+    model.create(isModelInstance(model, values) ? values.dataValues : values, { transaction: t, isNewRecord: true });
 
   var updateSelf = (model, values, t) => {
     var inst = isModelInstance(model, values) ? values : model.build(values, { isNewRecord: false });
@@ -69,7 +70,7 @@ function EmbedExport(sequelize) {
 
   /* Builds a new instance from the original and applies values */
   var mergeInstance = (model, inst, vals, include) => {
-    inst.set(vals)
+    inst.set(isModelInstance(model, vals) ? vals.dataValues : vals);
     include.map(inc => {
       var a = inc.association, as = a.associationAccessor;
       inst[as] = vals[as];
