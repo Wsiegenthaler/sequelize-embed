@@ -2,7 +2,7 @@
 var lo = require('lodash');
 var Promise = require('bluebird');
 
-var { allReflect, diff, isModelInstance, pkId, isHasOne, isHasMany, isBelongsTo, isBelongsToMany } = require('./util');
+var { allReflect, diff, isModelInstance, pkMatch, pkWhere, isHasOne, isHasMany, isBelongsTo, isBelongsToMany } = require('./util');
 var helpers = require('./include-helpers');
 
 
@@ -79,9 +79,10 @@ function EmbedExport(sequelize) {
   }
 
   var updateOrInsert = (model, val, include, t) => {
-    var pkVal = val[model.primaryKeyAttribute];
-    if (pkVal) {
-      return model.findById(pkVal).then(curVal =>
+    var hasPk = lo.every(model.primaryKeyAttributes, attr => val[attr]);
+    if (hasPk) {
+      var where = pkWhere(model, val);
+      return model.findOne({ where }).then(curVal =>
         lo.isObject(curVal) ?
           updateDeep(model, mergeInstance(model, curVal, val, include), include, t) :
           insertDeep(model, val, include, t));
@@ -128,7 +129,7 @@ function EmbedExport(sequelize) {
       var array = vals => lo.filter(lo.isArray(vals) ? vals : [vals], v => !!v)
       lastVals = array(lastVals)
       vals = array(vals).map(v => lo.set(v, a.foreignKey, instance[a.sourceKey || a.source.primaryKeyAttribute]));
-      var delta = diff(vals, lastVals, pkId(a.target));
+      var delta = diff(vals, lastVals, pkMatch(a.target));
       return allReflect(
         lo.flatten([
           delta.added.map(add => updateOrInsert(a.target, add, include, t)),
@@ -179,14 +180,12 @@ function EmbedExport(sequelize) {
 
   var reload = (model, instance, include, options) => {
     var defaults = { include, pruneFks: true, plain: false };
-    if (lo.isObject(options)) lo.merge(defaults, options);
+    if (lo.isObject(options)) lo.defaultsDeep(options, defaults);
     else if (options) options = defaults;
     else return Promise.resolve(instance);
     return instance.reload({ include: options.include }).then(inst => {
-      if (!lo.isBoolean(options.pruneFks) || !!options.pruneFks) pruneFks(model, inst, options.include);
-      if (!lo.isBoolean(options.plain) || !!options.plain) {
-        return plainify(inst, options.include);
-      } else return inst;
+      if (options.pruneFks) pruneFks(model, inst, options.include);
+      return options.plain ? plainify(inst, options.include) : inst;
     })
   };
 
