@@ -180,7 +180,7 @@ function EmbedExport(sequelize) {
 
   var reload = (model, instance, include, options) => {
     var defaults = { include, pruneFks: true, plain: false };
-    if (lo.isObject(options)) lo.defaultsDeep(options, defaults);
+    if (lo.isObject(options)) lo.defaults(options, defaults);
     else if (options) options = defaults;
     else return Promise.resolve(instance);
     return instance.reload({ include: options.include }).then(inst => {
