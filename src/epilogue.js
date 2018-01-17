@@ -3,13 +3,13 @@ var lo = require('lodash');
 function EpilogueExport(embed, sequelize, epilogue) {
 
   var { insert, update } = embed;
-  var { pruneFks } = embed.util;
+  const { prune } = embed.util;
 
   // ------------------ Middleware factory -------------------
   
   var factory = (include, options) => ({
     extraConfiguration: resource => {
-      options = lo.defaults(options, { reload: { plain: false, pruneFks: true }, prefetchUpdate: true });
+      options = lo.defaults(options, { reload: { plain: false, prune: true }, prefetchUpdate: true });
 
       /* Override standard includes */
       options.reload.include = options.reload.include || lo.clone(resource.include);
@@ -30,9 +30,9 @@ function EpilogueExport(embed, sequelize, epilogue) {
       });
 
       /* Prune foreign keys before sending result */
-      if (options.reload.pruneFks) {
+      if (options.reload.prune) {
         resource.read.send.before((req, res, ctx) => {
-          pruneFks(resource.model, ctx.instance, options.reload.include);
+          prune(resource.model, ctx.instance, options.reload.include);
           ctx.continue();
         });
       }
@@ -46,9 +46,9 @@ function EpilogueExport(embed, sequelize, epilogue) {
       });
 
       /* Prune foreign keys before sending result */
-      if (options.reload.pruneFks) {
+      if (options.reload.prune) {
         resource.list.send.before((req, res, ctx) => {
-          ctx.instance.map(inst => pruneFks(resource.model, inst, options.reload.include));
+          ctx.instance.map(inst => prune(resource.model, inst, options.reload.include));
           ctx.continue();
         });
       }

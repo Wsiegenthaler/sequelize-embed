@@ -59,7 +59,7 @@ Array specifying the nested associations to be embedded. The `include` parameter
 > > 
 > > Return plain object instead of Sequelize instances. (default `true`)
 > > 
-> > ##### pruneFks
+> > ##### prune
 > > 
 > > Whether to prune redundant foreign keys. (default `true`)
 

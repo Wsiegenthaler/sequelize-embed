@@ -2,8 +2,8 @@
 var lo = require('lodash');
 var Promise = require('bluebird');
 
-var { allReflect, diff, isModelInstance, pkMatch, pkWhere, isHasOne, isHasMany, isBelongsTo, isBelongsToMany } = require('./util');
 var helpers = require('./include-helpers');
+const { allReflect, diff, plainify, prune, isModelInstance, pkMatch, pkWhere, isHasOne, isHasMany, isBelongsTo, isBelongsToMany } = require('./util');
 
 
 function EmbedExport(sequelize) {
@@ -138,54 +138,14 @@ function EmbedExport(sequelize) {
         ));
       });
 
-  /* Removes redundant foreign keys from structure */
-  var pruneFks = (model, instance, include) => {
-    var clearFk = (model, inst, key) => {
-      if (inst && inst.dataValues) {
-        delete inst.dataValues[key];
-      }
-    }
-    if (lo.isArray(include)) {
-      include.map(inc => {
-        var a = inc.association;
-        if (isBelongsTo(a)) {
-          clearFk(model, instance, a.foreignKey);
-          pruneFks(inc.model, instance[a.associationAccessor], inc.include);
-        } else if (isHasOne(a)) {
-          clearFk(inc.model, instance[a.associationAccessor], a.foreignKey);
-          pruneFks(inc.model, instance[a.associationAccessor], inc.include);
-        } else if (isHasMany(a)) {
-          instance[a.associationAccessor].map(child => {
-            clearFk(inc.model, child, a.foreignKey);
-            pruneFks(inc.model, child, inc.include);
-          });
-        }
-      });
-    }
-  };
-
-  /* Converts sequelize instances to plain objects (dataValues) */
-  var plainify = (instance, include) => {
-    if (!lo.isObject(instance)) return instance;
-    var clone = lo.clone(instance.dataValues);
-    include.map(inc => {
-      var a = inc.association, as = a.associationAccessor, vals = instance[as];
-      if (isBelongsTo(a) || isHasOne(a))
-        lo.set(clone, as, plainify(vals, inc.include));
-      else if (isHasMany(a))
-        lo.set(clone, as, vals.map(val => plainify(val, inc.include)));
-    });
-    return clone;
-  };
-
-  var reload = (model, instance, include, options) => {
-    var defaults = { include, pruneFks: true, plain: false };
+  const reload = (model, instance, include, options) => {
+    const defaults = { include, prune: true, plain: false };
     if (lo.isObject(options)) lo.defaults(options, defaults);
     else if (options) options = defaults;
     else return Promise.resolve(instance);
     return instance.reload({ include: options.include }).then(inst => {
-      if (options.pruneFks) pruneFks(model, inst, options.include);
-      return options.plain ? plainify(inst, options.include) : inst;
+      if (options.prune) prune(model, inst, options.include);
+      return options.plain ? plainify(model, inst, options.include) : inst;
     })
   };
 
@@ -196,8 +156,10 @@ function EmbedExport(sequelize) {
     insert,
     update,
     util: {
+      diff,
+      plainify,
+      prune,
       helpers,
-      pruneFks,
       isHasOne, isHasMany, isBelongsTo, isBelongsToMany
     }
   };
