@@ -1,5 +1,5 @@
-var lo = require('lodash');
-var Promise = require('bluebird');
+const lo = require('lodash');
+const Promise = require('bluebird');
 
 
 /* 
@@ -7,10 +7,10 @@ var Promise = require('bluebird');
  * resolved or rejected (see bluebird .reflect). If any promises reject, will
  * throw the first one encountered, but only after all promises have concluded.
  */
-var allReflect = promises => 
+const allReflect = promises => 
   Promise.all(lo.flatten(promises.map(p => Promise.resolve(p).reflect())))
     .then(inspections => {
-      var firstReject = inspections.find(pi => pi.isRejected());
+      const firstReject = inspections.find(pi => pi.isRejected());
       if (firstReject) throw firstReject.reason();
     });
 
@@ -18,7 +18,7 @@ var allReflect = promises =>
  * Compares two arrays and categorizes elements as added, removed, or existing (exists in both, 
  * either changed or unchanged). Elements are matched by primary key(s).
  */
-var diff = (current, original, comparator) => {
+const diff = (current, original, comparator) => {
   current = current || [];
   original = original || [];
   return {
@@ -70,20 +70,20 @@ const prune = (model, instance, include) => {
 };
 
 /* Detects whether value object is an instance of the given model. Supports sequelize v3 & v4. */
-var isModelInstance = (model, value) => value instanceof (model.Instance || model);
+const isModelInstance = (model, value) => value instanceof (model.Instance || model);
 
 /* Compares primary key fields of two objects given their model and indicates whether they match */
-var pkMatch = model => (a, b) => lo.every(model.primaryKeyAttributes.map(attr => a[attr] === b[attr]));
+const pkMatch = model => (a, b) => lo.every(model.primaryKeyAttributes.map(attr => a[attr] === b[attr]));
 
 /* Constructs a sequelize compatible 'where' object with primary keys as defined by 'model' and 'val' */
-var pkWhere = (model, val) => lo.fromPairs(model.primaryKeyAttributes.map(attr => [attr, val[attr]]));
+const pkWhere = (model, val) => lo.fromPairs(model.primaryKeyAttributes.map(attr => [attr, val[attr]]));
 
 /* Association type detection */
-var isAssociationType = (type) => (a) => a.associationType === type || (!!a.association && a.association.associationType === type);
-var isHasOne = isAssociationType('HasOne'),
-    isHasMany = isAssociationType('HasMany'),
-    isBelongsTo = isAssociationType('BelongsTo'),
-    isBelongsToMany = isAssociationType('BelongsToMany');
+const isAssociationType = type => a => a.associationType === type || (!!a.association && a.association.associationType === type);
+const isHasOne = isAssociationType('HasOne'),
+      isHasMany = isAssociationType('HasMany'),
+      isBelongsTo = isAssociationType('BelongsTo'),
+      isBelongsToMany = isAssociationType('BelongsToMany');
 
 // ------------------ Exports -------------------
 

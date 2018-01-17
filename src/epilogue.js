@@ -1,13 +1,13 @@
-var lo = require('lodash');
+const lo = require('lodash');
 
 function EpilogueExport(embed, sequelize, epilogue) {
 
-  var { insert, update } = embed;
+  const { insert, update } = embed;
   const { prune } = embed.util;
 
   // ------------------ Middleware factory -------------------
   
-  var factory = (include, options) => ({
+  const factory = (include, options) => ({
     extraConfiguration: resource => {
       options = lo.defaults(options, { reload: { plain: false, prune: true }, prefetchUpdate: true });
 
@@ -15,7 +15,7 @@ function EpilogueExport(embed, sequelize, epilogue) {
       options.reload.include = options.reload.include || lo.clone(resource.include);
       resource.include.splice(0, resource.include.length);
 
-      var handleError = err => {
+      const handleError = err => {
         if (err.constructor === sequelize.OptimisticLockError)
           throw new epilogue.Errors.EpilogueError(409, 'conflict', err.message, err);
         else throw new epilogue.Errors.EpilogueError(500, 'internal error', err.message, err);

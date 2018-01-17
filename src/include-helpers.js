@@ -1,9 +1,9 @@
 "use strict";
 
-var lo = require('lodash');
+const lo = require('lodash');
 
-var includez = (...args) => lo.flatten(args).filter(e => e !== null);
-var include = (association, ...includes) => ({ model: association.target, include: includez(...includes), association });
-var when = (condition, ...includes) => !condition ? [] : includes;
+const includez = (...args) => lo.flatten(args).filter(e => e !== null);
+const include = (association, ...includes) => ({ model: association.target, include: includez(...includes), association });
+const when = (condition, ...includes) => !condition ? [] : includes;
 
 module.exports = { includes: includez, include, when };
