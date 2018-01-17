@@ -5,6 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Wsiegenthaler/sequelize-embed/badge.svg?branch=master)](https://coveralls.io/github/Wsiegenthaler/sequelize-embed?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/wsiegenthaler/sequelize-embed/badge.svg)](https://snyk.io/test/github/wsiegenthaler/sequelize-embed)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FWsiegenthaler%2Fsequelize-embed.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FWsiegenthaler%2Fsequelize-embed?ref=badge_shield)
 
 *Easily insert and update sequelize models with deeply nested associations*
 
@@ -193,3 +194,6 @@ resource.use(middleware(includeOnWrite))
 Everything in this repo is BSD License unless otherwise specified
 
 sequelize-embed (c) 2017 Weston Siegenthaler
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FWsiegenthaler%2Fsequelize-embed.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FWsiegenthaler%2Fsequelize-embed?ref=badge_large)
