@@ -73,7 +73,7 @@ const prune = (model, instance, include) => {
 const isModelInstance = (model, value) => value instanceof (model.Instance || model);
 
 /* Compares primary key fields of two objects given their model and indicates whether they match */
-const pkMatch = model => (a, b) => lo.every(model.primaryKeyAttributes.map(attr => a[attr] === b[attr]));
+const pkMatch = model => (a, b) => lo.every(model.primaryKeyAttributes.map(attr => a[attr] == b[attr]));
 
 /* Constructs a sequelize compatible 'where' object with primary keys as defined by 'model' and 'val' */
 const pkWhere = (model, val) => lo.fromPairs(model.primaryKeyAttributes.map(attr => [attr, val[attr]]));
