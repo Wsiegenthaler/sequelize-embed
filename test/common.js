@@ -66,6 +66,7 @@ var clear = () => Bluebird.all(lo.values(models).map(m => m.destroy({ truncate: 
 
 /* --------- Export --------- */
 module.exports = {
+  Sequelize,
   sequelize,
   models: sequelize.models,
   sync,
