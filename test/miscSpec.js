@@ -3,8 +3,7 @@ var { sequelize, models, sync, clear } = require('./common');
 var { Customer, Note, Item, ItemType, Order, Audit } = models;
 
 var embed = require('../src/index')(sequelize);
-var helpers = embed.util.helpers;
-var mkIncludes = helpers.includes, mkInclude = helpers.include;
+var { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- setup --- */

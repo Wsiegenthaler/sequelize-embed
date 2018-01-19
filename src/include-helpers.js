@@ -2,8 +2,8 @@
 
 const lo = require('lodash');
 
-const includez = (...args) => lo.flatten(args).filter(e => e !== null);
-const include = (association, ...includes) => ({ model: association.target, include: includez(...includes), association });
+const mkIncludes = (...args) => lo.flatten(args).filter(e => e !== null);
+const mkInclude = (association, ...includes) => ({ model: association.target, include: mkIncludes(...includes), association });
 const when = (condition, ...includes) => !condition ? [] : includes;
 
-module.exports = { includes: includez, include, when };
+module.exports = { mkIncludes, mkInclude, when };

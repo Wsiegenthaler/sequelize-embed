@@ -92,13 +92,13 @@ Order.Items = Order.hasMany(Item, { as: 'items', foreignKey: 'orderId' })
 Item.Department = Item.belongsTo(Department, { as: 'department', foreignKey: 'deptId' })`
 ```
 
-Use the `embed.util.helpers.include` helper to define the associations we wish to include. Here `itemsOnly` will update `Items` while `itemsAndDept` will update `Items` *and* `Departments`.
+Use the `mkInclude` helper to define the associations we wish to include. Here `itemsOnly` will update `Items` while `itemsAndDept` will update `Items` *and* `Departments`.
 
 ```javascript
-var include = embed.util.helpers.include
+var { mkInclude } = embed.util.helpers
 
-var itemsAndDept = [ include(Order.Items, include(Item.Department)) ]
-var itemsOnly = [ include(Order.Items) ]
+var itemsAndDept = [ mkInclude(Order.Items, mkInclude(Item.Department)) ]
+var itemsOnly = [ mkInclude(Order.Items) ]
 ```
 
 Insert an order, it's items, and departments by including `itemsAndDept`:

@@ -4,8 +4,7 @@ var Bluebird = require('bluebird');
 var { Sequelize, sequelize, sync } = require('../common');
 
 var embed = require('../../src/index')(sequelize);
-var helpers = embed.util.helpers;
-var mkIncludes = helpers.includes, mkInclude = helpers.include;
+var { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- setup --- */
