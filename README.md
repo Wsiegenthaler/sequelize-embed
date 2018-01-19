@@ -78,15 +78,15 @@ npm install --save sequelize-embed
 Import `sequelize-embed` and initialize with `sequelize`:
 
 ```javascript
-var embed = require('sequelize-embed')(sequelize)
+const embed = require('sequelize-embed')(sequelize)
 ```
 
 Setup an example schema - an *Order* can have *Items*, each of which is assigned a *Department*:
 
 ```javascript
-var Order = sequelize.define('Order', {})
-var Item = sequelize.define('Item', { quantity: Sequelize.STRING })
-var Department = sequelize.define('Department', { name: Sequelize.STRING })
+const Order = sequelize.define('Order', {})
+const Item = sequelize.define('Item', { quantity: Sequelize.STRING })
+const Department = sequelize.define('Department', { name: Sequelize.STRING })
 
 Order.Items = Order.hasMany(Item, { as: 'items', foreignKey: 'orderId' })
 Item.Department = Item.belongsTo(Department, { as: 'department', foreignKey: 'deptId' })`
@@ -95,16 +95,16 @@ Item.Department = Item.belongsTo(Department, { as: 'department', foreignKey: 'de
 Use the `mkInclude` helper to define the associations we wish to include. Here `itemsOnly` will update `Items` while `itemsAndDept` will update `Items` *and* `Departments`.
 
 ```javascript
-var { mkInclude } = embed.util.helpers
+const { mkInclude } = embed.util.helpers
 
-var itemsAndDept = [ mkInclude(Order.Items, mkInclude(Item.Department)) ]
-var itemsOnly = [ mkInclude(Order.Items) ]
+const itemsAndDept = [ mkInclude(Order.Items, mkInclude(Item.Department)) ]
+const itemsOnly = [ mkInclude(Order.Items) ]
 ```
 
 Insert an order, it's items, and departments by including `itemsAndDept`:
 
 ```javascript
-var order = {
+const order = {
   items: [ { quantity: 1, department: { name: 'produce' } } ]
 }
 
@@ -117,7 +117,7 @@ embed.insert(Order, order, itemsAndDept)
 Change the quantity and department of our existing item:
 
 ```javascript
-var order = {
+const order = {
   id: 1,
   items: [ { id: 1, quantity: 2, department: { name: 'dairy' } } ]
 }
@@ -131,7 +131,7 @@ embed.update(Order, order, itemsAndDept)
 For the purposes of demonstration we've included `Departments` in our update, but since a `Department` is shared between orders we probably wouldn't want to include them when updating an order. Let's add another item, this time including just `itemsOnly` and being sure to specify a department known to exist:
 
 ```javascript
-var order = {
+const order = {
   id: 1,
   items: [
     { id: 1, quantity: 2, department: { id: 2, name: 'dairy' } },
@@ -150,7 +150,7 @@ Notice that the new item was correctly assigned to the `produce` department desp
 Finally, remove the first item and reassign the second to the `dairy` department:
 
 ```javascript
-var order = {
+const order = {
   id: 1,
   items: [ { id: 2, quantity: 3, department: { id: 2 } } ]
 }
@@ -172,13 +172,13 @@ Since the underlying data is normalized, completing an `update` or `insert` oper
 *Sequelize Embed* also provides *Epilogue* middleware for automatically updating associations during PUT and POST operations. This can greatly simplify client development by giving your REST api the feel of a document-oriented database.
 
 ```javascript
-var embed = require('sequelize-embed')(sequelize)
+const embed = require('sequelize-embed')(sequelize)
 
-var includeOnRead = ...  // include for get
-var includeOnWrite = ... // include for put/post
+const includeOnRead = ...  // include for get
+const includeOnWrite = ... // include for put/post
 
 // setup resource like normal
-var resource = epilogue.resource({
+const resource = epilogue.resource({
   model: Model,
   include: includeOnRead,
   associations: false,
@@ -186,7 +186,7 @@ var resource = epilogue.resource({
 });
 
 // add middleware to the resource, specifying includes
-var middleware = embed.Epilogue(epilogue)
+const middleware = embed.Epilogue(epilogue)
 resource.use(middleware(includeOnWrite))
 ```
 

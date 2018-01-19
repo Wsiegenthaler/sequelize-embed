@@ -1,14 +1,14 @@
 
-var { sequelize, models, sync, clear } = require('./common');
-var { Customer, Item, ItemType, Order, Audit } = models;
+const { sequelize, models, sync, clear } = require('./common');
+const { Customer, Item, ItemType, Order, Audit } = models;
 
-var embed = require('../src/index')(sequelize);
-var { mkIncludes, mkInclude } = embed.util.helpers;
+const embed = require('../src/index')(sequelize);
+const { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- setup --- */
 
-var include = mkIncludes(mkInclude(Order.Audit));
+const include = mkIncludes(mkInclude(Order.Audit));
 
 
 /* --- tests --- */

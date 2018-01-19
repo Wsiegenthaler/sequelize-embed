@@ -1,11 +1,11 @@
 
-var Bluebird = require('bluebird');
+const Bluebird = require('bluebird');
 
-var { sequelize, models, sync, clear } = require('./common');
-var { Customer, Region, Item, ItemType, Order, Audit, Note, Flag } = models;
+const { sequelize, models, sync, clear } = require('./common');
+const { Customer, Region, Item, ItemType, Order, Audit, Note, Flag } = models;
 
-var embed = require('../src/index')(sequelize);
-var { mkIncludes, mkInclude } = embed.util.helpers;
+const embed = require('../src/index')(sequelize);
+const { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- tests --- */
@@ -16,8 +16,8 @@ describe('nested belongsTo', () => {
 
   describe('within hasMany', () => {
 
-    var include = mkIncludes(mkInclude(Order.Items, mkInclude(Item.ItemType)));
-    var opts = { reload: { include } };
+    const include = mkIncludes(mkInclude(Order.Items, mkInclude(Item.ItemType)));
+    const opts = { reload: { include } };
 
     describe('which exists', () => {
 
@@ -70,7 +70,7 @@ describe('nested belongsTo', () => {
       });
 
       it('should skip nested value if not included', done => {
-        var include = mkIncludes(mkInclude(Order.Items));
+        const include = mkIncludes(mkInclude(Order.Items));
         ItemType.create({ dept: 'meat' }).then(it =>
           Order.create({ name: 'o1' }).then(o =>
             Item.create({ orderId: o.id, typeId: it.id, quantity: 7 }).then(i =>
@@ -120,8 +120,8 @@ describe('nested belongsTo', () => {
 
   describe('within belongsTo', () => {
 
-    var include = mkIncludes(mkInclude(Order.Customer, mkInclude(Customer.Region)));
-    var opts = { reload: { include } };
+    const include = mkIncludes(mkInclude(Order.Customer, mkInclude(Customer.Region)));
+    const opts = { reload: { include } };
 
     describe('which exists', () => {
 
@@ -176,7 +176,7 @@ describe('nested belongsTo', () => {
       });
 
       it('should skip nested value if not included', done => {
-        var include = mkIncludes(mkInclude(Order.Customer));
+        const include = mkIncludes(mkInclude(Order.Customer));
         Region.create({ name: 'nw' }).then(r =>
           Customer.create({ name: 'c1', regionId: r.id }).then(c =>
             Order.create({ name: 'o1' }).then(o =>
@@ -237,8 +237,8 @@ describe('nested hasMany', () => {
 
   describe('within hasMany', () => {
 
-    var include = mkIncludes(mkInclude(Order.Notes, mkInclude(Note.Flags)));
-    var opts = { reload: { include } };
+    const include = mkIncludes(mkInclude(Order.Notes, mkInclude(Note.Flags)));
+    const opts = { reload: { include } };
 
     describe('which exists', () => {
 
@@ -314,7 +314,7 @@ describe('nested hasMany', () => {
       });
 
       it('should skip nested value if not included', done => {
-        var include = mkIncludes(mkInclude(Order.Notes));
+        const include = mkIncludes(mkInclude(Order.Notes));
         Order.create({ name: 'o1' }).then(o =>
           Note.create({ orderId: o.id, body: 'foo' }).then(n =>
             Flag.create({ orderId: o.id, code: 'bar' }).then(f =>
@@ -378,8 +378,8 @@ describe('nested hasMany', () => {
 
   describe('within belongsTo', () => {
 
-    var include = mkIncludes(mkInclude(Order.Customer, mkInclude(Customer.Region)));
-    var opts = { reload: { include } };
+    const include = mkIncludes(mkInclude(Order.Customer, mkInclude(Customer.Region)));
+    const opts = { reload: { include } };
 
     describe('which exists', () => {
 
@@ -435,7 +435,7 @@ describe('nested hasMany', () => {
       });
 
       it('should skip nested value if not included', done => {
-        var include = mkIncludes(mkInclude(Order.Customer));
+        const include = mkIncludes(mkInclude(Order.Customer));
         Region.create({ name: 'nw' }).then(r =>
           Customer.create({ name: 'c1', regionId: r.id }).then(c =>
             Order.create({ name: 'o1' }).then(o =>

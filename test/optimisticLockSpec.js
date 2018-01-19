@@ -1,15 +1,15 @@
 
-var { sequelize, models, sync, clear } = require('./common');
-var Sequelize = sequelize.Sequelize;
-var { Customer, Item, ItemType, Audit } = models;
+const { sequelize, models, sync, clear } = require('./common');
+const Sequelize = sequelize.Sequelize;
+const { Customer, Item, ItemType, Audit } = models;
 
-var embed = require('../src/index')(sequelize);
-var { mkIncludes, mkInclude } = embed.util.helpers;
+const embed = require('../src/index')(sequelize);
+const { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- setup --- */
 
-var LockedOrder = sequelize.define('LockedOrder', {
+const LockedOrder = sequelize.define('LockedOrder', {
   name: Sequelize.STRING
 }, {
   version: 'rev',
@@ -18,8 +18,8 @@ var LockedOrder = sequelize.define('LockedOrder', {
 
 LockedOrder.Customer = LockedOrder.belongsTo(Customer, { as: 'customer' })
 
-var include = mkIncludes(mkInclude(LockedOrder.Customer));
-var opts = { reload: { include } };
+const include = mkIncludes(mkInclude(LockedOrder.Customer));
+const opts = { reload: { include } };
 
 
 /* --- tests --- */
@@ -27,7 +27,7 @@ var opts = { reload: { include } };
 describe('record with optimistic lock', () => {
   beforeEach(sync);
 
-  var skipIfNoLocking = (f, done) => {
+  const skipIfNoLocking = (f, done) => {
     if (!!sequelize.OptimisticLockError) f();
     else done();
   }

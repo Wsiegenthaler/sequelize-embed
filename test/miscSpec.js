@@ -1,15 +1,15 @@
 
-var { sequelize, models, sync, clear } = require('./common');
-var { Customer, Note, Item, ItemType, Order, Audit } = models;
+const { sequelize, models, sync, clear } = require('./common');
+const { Customer, Note, Item, ItemType, Order, Audit } = models;
 
-var embed = require('../src/index')(sequelize);
-var { mkIncludes, mkInclude } = embed.util.helpers;
+const embed = require('../src/index')(sequelize);
+const { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- setup --- */
 
-var include = mkIncludes(mkInclude(Order.Notes));
-var opts = { reload: { include } };
+const include = mkIncludes(mkInclude(Order.Notes));
+const opts = { reload: { include } };
 
 
 /* --- tests --- */

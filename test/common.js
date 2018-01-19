@@ -1,46 +1,46 @@
 
-var lo = require('lodash');
-var Bluebird = require('bluebird');
+const lo = require('lodash');
+const Bluebird = require('bluebird');
 
 
 /* --------- Test Database --------- */
 
-var Sequelize = require('sequelize')
-var sequelize = new Sequelize('testdb', null, null, { dialect: 'sqlite' })
+const Sequelize = require('sequelize')
+const sequelize = new Sequelize('testdb', null, null, { dialect: 'sqlite' })
 
 /* --------- Models --------- */
 
-var Customer = sequelize.define('Customer', {
+const Customer = sequelize.define('Customer', {
   name: Sequelize.STRING
 })
 
-var Region = sequelize.define('Region', {
+const Region = sequelize.define('Region', {
   name: Sequelize.STRING
 })
 
-var Item = sequelize.define('Item', {
+const Item = sequelize.define('Item', {
   quantity: Sequelize.INTEGER
 })
 
-var ItemType = sequelize.define('ItemType', {
+const ItemType = sequelize.define('ItemType', {
   dept: Sequelize.STRING
 })
 
-var Note = sequelize.define('Note', {
+const Note = sequelize.define('Note', {
   body: Sequelize.STRING,
   orderId: { type: Sequelize.INTEGER, primaryKey: true }
 })
 
-var Flag = sequelize.define('Flag', {
+const Flag = sequelize.define('Flag', {
   code: Sequelize.STRING
 })
 
-var Audit = sequelize.define('Audit', {
+const Audit = sequelize.define('Audit', {
   manager: Sequelize.STRING,
   authorized: { type: Sequelize.BOOLEAN, defaultValue: false }
 })
 
-var Order = sequelize.define('Order', {
+const Order = sequelize.define('Order', {
   name: Sequelize.STRING
 }, { timestamps: false })
 
@@ -60,9 +60,9 @@ Note.Flags = Note.hasMany(Flag, { as: 'flags', foreignKey: 'orderId' });
 
 /* --------- Util --------- */
 
-var sync = done => sequelize.sync({ force: true, logging: false }).then(() => done())
+const sync = done => sequelize.sync({ force: true, logging: false }).then(() => done())
 
-var clear = () => Bluebird.all(lo.values(models).map(m => m.destroy({ truncate: true })));
+const clear = () => Bluebird.all(lo.values(models).map(m => m.destroy({ truncate: true })));
 
 /* --------- Export --------- */
 module.exports = {

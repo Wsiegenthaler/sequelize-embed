@@ -1,17 +1,17 @@
 
-var Bluebird = require('bluebird');
+const Bluebird = require('bluebird');
 
-var { sequelize, models, sync, clear } = require('./common');
-var { Customer, Item, ItemType, Order, Item } = models;
+const { sequelize, models, sync, clear } = require('./common');
+const { Customer, Item, ItemType, Order } = models;
 
-var embed = require('../src/index')(sequelize);
-var { mkIncludes, mkInclude } = embed.util.helpers;
+const embed = require('../src/index')(sequelize);
+const { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- setup --- */
 
-var include = mkIncludes(mkInclude(Order.Items));
-var opts = { reload: { include } };
+const include = mkIncludes(mkInclude(Order.Items));
+const opts = { reload: { include } };
 
 
 /* --- tests --- */

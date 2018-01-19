@@ -1,25 +1,25 @@
 
-var Bluebird = require('bluebird');
+const Bluebird = require('bluebird');
 
-var { Sequelize, sequelize, sync } = require('../common');
+const { Sequelize, sequelize, sync } = require('../common');
 
-var embed = require('../../src/index')(sequelize);
-var { mkIncludes, mkInclude } = embed.util.helpers;
+const embed = require('../../src/index')(sequelize);
+const { mkIncludes, mkInclude } = embed.util.helpers;
 
 
 /* --- setup --- */
 
-var ModelA = sequelize.define('ModelA', {});
+const ModelA = sequelize.define('ModelA', {});
 
-var ModelB = sequelize.define('ModelB', {
+const ModelB = sequelize.define('ModelB', {
   valA: Sequelize.STRING,
   valB: Sequelize.STRING
 });
 
 ModelA.ModelB = ModelA.hasOne(ModelB, { as: 'b', foreignKey: 'aId' });
 
-var include = mkIncludes(mkInclude(ModelA.ModelB));
-var opts = { reload: { include } };
+const include = mkIncludes(mkInclude(ModelA.ModelB));
+const opts = { reload: { include } };
 
 
 /* --- tests --- */
