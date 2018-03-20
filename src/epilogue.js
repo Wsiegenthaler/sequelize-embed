@@ -74,7 +74,18 @@ function EpilogueExport(embed, sequelize, epilogue) {
 
       /* Perform updates and skip the default write milestone */
       resource.update.write.before((req, res, ctx) => {
-        ctx.instance.set(req.body);
+        if (options.prefetchUpdate) {
+          ctx.instance.set(req.body);
+        
+          /* Ensure version attribute is set */
+          var ver = resource.model.options.version;
+          if (ver) {
+            ver = lo.isString(ver) ? ver : 'version';
+            ctx.instance.set(ver, req.body[ver], { raw: true });
+            ctx.instance.changed(ver, true); // force update
+          }
+        } else ctx.instance = req.body;
+
         return update(resource.model, ctx.instance, include, options)
           .then(inst => ctx.instance = inst)
           .catch(handleError)
