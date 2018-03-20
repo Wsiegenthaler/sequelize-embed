@@ -75,7 +75,7 @@ function EpilogueExport(embed, sequelize, epilogue) {
       /* Perform updates and skip the default write milestone */
       resource.update.write.before((req, res, ctx) => {
         ctx.instance.set(req.body);
-        update(resource.model, ctx.instance, include, options)
+        return update(resource.model, ctx.instance, include, options)
           .then(inst => ctx.instance = inst)
           .catch(handleError)
           .then(ctx.skip);
