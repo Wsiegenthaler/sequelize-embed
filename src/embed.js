@@ -31,8 +31,8 @@ function EmbedExport(sequelize) {
       .then(action)
       .then(inst => updateDownstream(inst, values, include, t));
 
-  const insertDeep = (model, values, include, t) => traverseDeep(model, values, include || [], t, () => insertSelf(model, values, t));
-  const updateDeep = (model, values, include, t) => traverseDeep(model, values, include || [], t, () => updateSelf(model, values, t));
+  const insertDeep = (model, values, include, t) => traverseDeep(model, values, include, t, () => insertSelf(model, values, t));
+  const updateDeep = (model, values, include, t) => traverseDeep(model, values, include, t, () => updateSelf(model, values, t));
 
   const commit = (t, skip) => () => {
     if (!skip) return t.commit();
@@ -60,18 +60,18 @@ function EmbedExport(sequelize) {
   }
 
   const updateUpstream = (model, values, include, t) => 
-    updateBelongsTos(model, values, include.filter(isBelongsTo), t);
+    updateBelongsTos(model, values, (include || []).filter(isBelongsTo), t);
 
   const updateDownstream = (instance, values, include, t) => {
-    const hasManyInclude = include.filter(isHasMany), hasOneInclude = include.filter(isHasOne);
-    return allReflect([updateHasManys(instance, values, hasManyInclude, t), updateHasOnes(instance, values, hasOneInclude, t) ])
+    const hasManyInclude = (include || []).filter(isHasMany), hasOneInclude = (include || []).filter(isHasOne);
+    return allReflect([ updateHasManys(instance, values, hasManyInclude, t), updateHasOnes(instance, values, hasOneInclude, t) ])
       .then(() => instance);
   }
 
   /* Builds a new instance from the original and applies values */
   const mergeInstance = (model, inst, vals, include) => {
     inst.set(isModelInstance(model, vals) ? vals.dataValues : vals);
-    include.map(inc => {
+    (include || []).map(inc => {
       const a = inc.association, as = a.associationAccessor;
       inst[as] = vals[as];
     });
@@ -113,20 +113,20 @@ function EmbedExport(sequelize) {
   }
 
   const updateHasOnes = (instance, values, include, t) => 
-    allReflect(include.map(inc => {
+    allReflect((include || []).map(inc => {
       const a = inc.association, as = a.associationAccessor, val = values[as];
       if (!lo.isUndefined(val)) return updateHasValues(instance, val, a, inc.include, t);
     }));
 
   const updateHasManys = (instance, data, include, t) => 
-    allReflect(include.map(inc => {
+    allReflect((include || []).map(inc => {
       const a = inc.association, as = a.associationAccessor, vals = data[as];
       if (lo.isArray(vals) || vals === null) return updateHasValues(instance, vals || [], a, inc.include, t);
     }));
 
   const updateHasValues = (instance, vals, a, include, t) => 
     a.get(instance).then(lastVals => {
-      const array = vals => lo.filter(lo.isArray(vals) ? vals : [vals], v => !!v);
+      const array = vals => lo.filter(lo.isArray(vals) ? vals : [ vals ], v => !!v);
       lastVals = array(lastVals);
       vals = array(vals).map(v => lo.set(v, a.foreignKey, instance[a.sourceKey || a.source.primaryKeyAttribute]));
       const delta = diff(vals, lastVals, pkMatch(a.target));

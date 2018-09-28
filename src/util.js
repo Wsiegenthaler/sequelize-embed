@@ -33,7 +33,7 @@ const diff = (current, original, comparator) => {
 const plainify = (model, instance, include) => {
   if (!lo.isObject(instance)) return instance;
   const clone = lo.pick(instance, lo.keys(model.rawAttributes));
-  include.map(inc => {
+  (include || []).map(inc => {
     const a = inc.association, as = a.associationAccessor, vals = instance[as];
     if (isBelongsTo(a) || isHasOne(a))
       lo.set(clone, as, plainify(a.target, vals, inc.include));
@@ -49,23 +49,21 @@ const prune = (model, instance, include) => {
     if (inst) delete inst[key];
     if (inst && inst.dataValues) delete inst.dataValues[key];
   }
-  if (lo.isArray(include)) {
-    include.map(inc => {
-      const a = inc.association, as = a.associationAccessor, value = instance[as];
-      if (isBelongsTo(a)) {
-        clearFk(model, instance, a.foreignKey);
-        prune(inc.model, value, inc.include);
-      } else if (isHasOne(a)) {
-        clearFk(inc.model, value, a.foreignKey);
-        prune(inc.model, value, inc.include);
-      } else if (isHasMany(a)) {
-        value.map(child => {
-          clearFk(inc.model, child, a.foreignKey);
-          prune(inc.model, child, inc.include);
-        });
-      }
-    });
-  }
+  (include || []).map(inc => {
+    const a = inc.association, as = a.associationAccessor, value = instance[as];
+    if (isBelongsTo(a)) {
+      clearFk(model, instance, a.foreignKey);
+      prune(inc.model, value, inc.include);
+    } else if (isHasOne(a)) {
+      clearFk(inc.model, value, a.foreignKey);
+      prune(inc.model, value, inc.include);
+    } else if (isHasMany(a)) {
+      value.map(child => {
+        clearFk(inc.model, child, a.foreignKey);
+        prune(inc.model, child, inc.include);
+      });
+    }
+  });
   return instance;
 };
 
